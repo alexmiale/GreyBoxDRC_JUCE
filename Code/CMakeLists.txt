@@ -15,7 +15,7 @@ juce_add_plugin(GreyBoxDRC
 	PLUGIN_MANUFACTURER_CODE TRUE 
 	PLUGIN_CODE Abc8
 	# should change for each plugin
-	FORMATS AU VST3 Standalone
+	FORMATS AU VST3
 	# should change for each plugin
 	PRODUCT_NAME "GreyBoxDRC")
 

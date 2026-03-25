@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Compressor/CompModel.h"
 
 //==============================================================================
 GreyBoxDRCAudioProcessor::GreyBoxDRCAudioProcessor()
