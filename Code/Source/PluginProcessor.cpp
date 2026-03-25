@@ -8,7 +8,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Compressor/CompModel.h"
 
 //==============================================================================
 GreyBoxDRCAudioProcessor::GreyBoxDRCAudioProcessor()
@@ -96,6 +95,20 @@ void GreyBoxDRCAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    for (int ch = 0; ch < kMaxChannels; ++ch)
+    {
+        compressor[ch].prepare(sampleRate);
+        compressor[ch].reset();
+
+        // ?? Load learned parameters from your .ckpt ??
+        // Replace these with the actual values you extract
+        // from the checkpoint using the Python script.
+        compressor[ch].setThreshold(-25.0f);       // dB
+        compressor[ch].setRatio(4.0f);
+        compressor[ch].setWidth(6.0f);              // soft-knee width in dB
+        compressor[ch].setTimeConstant(0.015f);     // ? in seconds
+        compressor[ch].setMakeUpGainDB(8.0f);       // dB
+    }
 }
 
 void GreyBoxDRCAudioProcessor::releaseResources()
@@ -135,6 +148,7 @@ void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+    const int numSamples = buffer.getNumSamples();
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
@@ -143,7 +157,7 @@ void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear (i, 0, numSamples);
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -151,11 +165,13 @@ void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    for (int channel = 0; channel < totalNumInputChannels && channel < kMaxChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
+        compressor[channel].processBlock(channelData, numSamples);
 
         // ..do something to the data...
+
     }
 }
 

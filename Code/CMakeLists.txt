@@ -15,7 +15,7 @@ juce_add_plugin(GreyBoxDRC
 	PLUGIN_MANUFACTURER_CODE TRUE 
 	PLUGIN_CODE Abc8
 	# should change for each plugin
-	FORMATS AU VST3
+	FORMATS AU VST3 Standalone
 	# should change for each plugin
 	PRODUCT_NAME "GreyBoxDRC")
 
@@ -24,7 +24,11 @@ juce_generate_juce_header(GreyBoxDRC)
 target_sources(GreyBoxDRC
 	PRIVATE 
 	Source/PluginEditor.cpp 
-	Source/PluginProcessor.cpp)
+	Source/PluginProcessor.cpp
+	Source/Compressor/CompModel.cpp
+	Source/Compressor/GainSmooth.cpp
+	Source/Compressor/MakeUp.cpp
+	Source/Compressor/StaticComp.cpp)
 
 target_compile_definitions(GreyBoxDRC
 	PUBLIC 

@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "RTNeural/RTNeural.h"
+#include "Compressor/CompModel.h"
 
 //==============================================================================
 /**
@@ -56,5 +57,8 @@ public:
 
 private:
     //==============================================================================
+    // One compressor per channel for independent processing
+    static constexpr int kMaxChannels = 2;
+    CompModel compressor[kMaxChannels];
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GreyBoxDRCAudioProcessor)
 };

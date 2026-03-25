@@ -25,7 +25,7 @@ public:
 
     /** Call once before processing to set the curve parameters.
      *  These will eventually come from an MLP at runtime. */
-    void setParams(float thresholdDB, float ratio);
+    void setParams(float thresholdDB, float ratio, float width);
 
     /** Returns the gain-reduction in dB for a given input level in dB.
      *  Result is in the range [-80, 0]. */
