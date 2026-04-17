@@ -15,7 +15,7 @@ GreyBoxDRCAudioProcessor::GreyBoxDRCAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+                       .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
@@ -95,20 +95,21 @@ void GreyBoxDRCAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    for (int ch = 0; ch < kMaxChannels; ++ch)
-    {
-        compressor[ch].prepare(sampleRate);
-        compressor[ch].reset();
 
-        // ?? Load learned parameters from your .ckpt ??
-        // Replace these with the actual values you extract
-        // from the checkpoint using the Python script.
-        compressor[ch].setThreshold(-25.0f);       // dB
-        compressor[ch].setRatio(4.0f);
-        compressor[ch].setWidth(6.0f);              // soft-knee width in dB
-        compressor[ch].setTimeConstant(0.015f);     // ? in seconds
-        compressor[ch].setMakeUpGainDB(8.0f);       // dB
-    }
+    auto modelFilePath = "Models/weights.json";
+    
+    compressor.prepare(sampleRate);
+    compressor.reset();
+
+    // ?? Load learned parameters from your .ckpt ??
+    // Replace these with the actual values you extract
+    // from the checkpoint using the Python script.
+    compressor.setThreshold(-25.0f);       // dB
+    compressor.setRatio(4.0f);
+    compressor.setWidth(6.0f);              // soft-knee width in dB
+    compressor.setTimeConstant(0.015f);     // ? in seconds
+    compressor.setMakeUpGainDB(8.0f);       // dB
+    
 }
 
 void GreyBoxDRCAudioProcessor::releaseResources()
@@ -143,6 +144,10 @@ bool GreyBoxDRCAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
+void GreyBoxDRCAudioProcessor::sliderValueChanged(juce::Slider* slider) {
+    param = slider->getValue();
+}
+
 void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -165,10 +170,10 @@ void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels && channel < kMaxChannels; ++channel)
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
-        compressor[channel].processBlock(channelData, numSamples);
+        compressor.processBlock(channelData, numSamples);
 
         // ..do something to the data...
 

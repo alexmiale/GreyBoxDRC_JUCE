@@ -9,13 +9,12 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "RTNeural/RTNeural.h"
 #include "Compressor/CompModel.h"
 
 //==============================================================================
 /**
 */
-class GreyBoxDRCAudioProcessor  : public juce::AudioProcessor
+class GreyBoxDRCAudioProcessor  : public juce::AudioProcessor, public juce::Slider::Listener
 {
 public:
     //==============================================================================
@@ -55,10 +54,13 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    void sliderValueChanged(juce::Slider* slider) override;
+
 private:
     //==============================================================================
-    // One compressor per channel for independent processing
-    static constexpr int kMaxChannels = 2;
-    CompModel compressor[kMaxChannels];
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GreyBoxDRCAudioProcessor)
+    CompModel compressor;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GreyBoxDRCAudioProcessor)
+
+    std::string modelFilePath;
+    float param = 0.0f;
 };

@@ -7,6 +7,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "RTNeural/RTNeural.h"
+
 /**
  * CompModel — Full grey-box compressor chain (Config Set 1).
  *
@@ -78,4 +80,12 @@ private:
     // Minimum dB floor to avoid log10(0)
     static constexpr float kMinDB = -80.0f;
     static constexpr float kFloor = 1e-10f;   // ~ -200 dBFS
+
+    RTNeural::ModelT<float, 1, 1,
+        RTNeural::DenseT<float, 1, 20>,
+        RTNeural::ReLuActivationT<float, 20>,
+        RTNeural::DenseT<float, 20, 20>,
+        RTNeural::ReLuActivationT<float, 20>,
+        RTNeural::DenseT<float, 20, 3>, 
+        RTNeural::SigmoidActivationT<float, 3>> model;
 };
