@@ -96,19 +96,30 @@ void GreyBoxDRCAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
-    auto modelFilePath = "Models/weights.json";
+    modelFilePath = "Models/hcmlp_weights.json";
+
+    std::cout << "Loading model from path: " << modelFilePath << std::endl;
+    std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
+    if (!jsonStream.is_open()) {
+        std::cerr << "ERROR: Failed to open model file: " << modelFilePath << std::endl;
+        std::cerr << "Current working directory might be different during build process" << std::endl;
+        // Don't crash - the plugin can still be instantiated without the model
+        return;
+    }
+
+    compressor.loadModel(jsonStream);
     
     compressor.prepare(sampleRate);
     compressor.reset();
 
-    // ?? Load learned parameters from your .ckpt ??
-    // Replace these with the actual values you extract
-    // from the checkpoint using the Python script.
-    compressor.setThreshold(-25.0f);       // dB
-    compressor.setRatio(4.0f);
-    compressor.setWidth(6.0f);              // soft-knee width in dB
-    compressor.setTimeConstant(0.015f);     // ? in seconds
-    compressor.setMakeUpGainDB(8.0f);       // dB
+    // start at 0, update when slider is changed
+    compressor.setThreshold(0.0f);       // dB
+    compressor.setRatio(1.0f);
+    compressor.setWidth(0.0f);              // soft-knee width in dB
+
+    // values taken from Models/dsp_params.json 
+    compressor.setTimeConstant(0.069f);     // ? in seconds
+    compressor.setMakeUpGainDB(0.0f);       // dB
     
 }
 
@@ -144,8 +155,12 @@ bool GreyBoxDRCAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
+/** update the compressor when the slider has changed **/
 void GreyBoxDRCAudioProcessor::sliderValueChanged(juce::Slider* slider) {
     param = slider->getValue();
+    const float* outputs = compressor.forward(param);
+
+    compressor.setAllCompFromModel(outputs);
 }
 
 void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)

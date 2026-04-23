@@ -52,6 +52,8 @@ public:
     void setThreshold(float thresholdDB);
     void setRatio(float ratio);
     void setWidth(float width);
+    /** takes output from model and processes data to be in correct range */
+    void setAllCompFromModel(const float* inputs);
 
     /** Level-detector time-constant (seconds). */
     void setTimeConstant(float tauSeconds);
@@ -72,6 +74,13 @@ public:
     const GainSmooth& getGainSmooth() const { return gainSmooth; }
     const MakeUp& getMakeUp()     const { return makeUp; }
 
+    /** load the model weights into the model variable **/
+    void loadModel(std::ifstream& jsonStream);
+
+    /** initate forward pass for the model
+        model returns 3 values for threshold, ratio, and knee width**/
+    const float* forward(float input);
+
 private:
     StaticComp staticComp;
     GainSmooth gainSmooth;
@@ -81,7 +90,7 @@ private:
     static constexpr float kMinDB = -80.0f;
     static constexpr float kFloor = 1e-10f;   // ~ -200 dBFS
 
-    RTNeural::ModelT<float, 1, 1,
+    RTNeural::ModelT<float, 1, 3,
         RTNeural::DenseT<float, 1, 20>,
         RTNeural::ReLuActivationT<float, 20>,
         RTNeural::DenseT<float, 20, 20>,

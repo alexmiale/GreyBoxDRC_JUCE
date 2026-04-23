@@ -12,6 +12,20 @@ void CompModel::reset()
     gainSmooth.reset();
 }
 
+void CompModel::loadModel(std::ifstream& jsonStream) {
+    nlohmann::json fullJson;
+    jsonStream >> fullJson;
+
+    auto& dense1 = model.get<0>(); // input (1) to 20
+    RTNeural::torch_helpers::loadDense<float>(fullJson, "model.HCNet.0.", dense1);
+
+    auto& dense2 = model.get<2>(); // 20 to 20
+    RTNeural::torch_helpers::loadDense<float>(fullJson, "model.HCNet.2.", dense2);
+
+    auto& output = model.get<4>(); // 20 to output (3)
+    RTNeural::torch_helpers::loadDense<float>(fullJson, "model.HCNet.4.", output);
+}
+
 // ?? Parameter setters ????????????????????????????????????????
 
 void CompModel::setThreshold(float thresholdDB)
@@ -27,6 +41,15 @@ void CompModel::setRatio(float ratio)
 void CompModel::setWidth(float width)
 {
     staticComp.setParams(staticComp.getThreshold(), staticComp.getRatio(), width);
+}
+
+
+void CompModel::setAllCompFromModel(const float* inputs) {
+    float thresholdDB = inputs[0] * -80.0f;         // [-80, 0] dB
+    float ratio = inputs[1] * 29.0f + 1.0f;       //  [1, 30]
+    float kneeWidth = inputs[2] * 30.0f;          //  [0, 30]
+
+    staticComp.setParams(thresholdDB, ratio, kneeWidth);
 }
 
 void CompModel::setTimeConstant(float tauSeconds)
@@ -79,4 +102,9 @@ void CompModel::processBlock(float* buffer, int numSamples)
 {
     for (int i = 0; i < numSamples; ++i)
         buffer[i] = processSample(buffer[i]);
+}
+
+const float* CompModel::forward(float input) {
+    model.forward(&input);
+    return model.getOutputs();
 }
