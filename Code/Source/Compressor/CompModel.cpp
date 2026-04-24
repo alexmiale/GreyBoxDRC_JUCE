@@ -24,6 +24,17 @@ void CompModel::loadModel(std::ifstream& jsonStream) {
 
     auto& output = model.get<4>(); // 20 to output (3)
     RTNeural::torch_helpers::loadDense<float>(fullJson, "model.HCNet.4.", output);
+
+    // Test: run a known input and print output
+    float testInput = -1.0f;
+    model.forward(&testInput);
+    const float* result = model.getOutputs();
+    std::cout << "Test forward(-1.0): " << result[0] << ", " << result[1] << ", " << result[2] << std::endl;
+
+    testInput = 1.0f;
+    model.forward(&testInput);
+    result = model.getOutputs();
+    std::cout << "Test forward(1.0): " << result[0] << ", " << result[1] << ", " << result[2] << std::endl;
 }
 
 // Parameter setters 

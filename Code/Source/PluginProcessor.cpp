@@ -96,7 +96,7 @@ void GreyBoxDRCAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
-    modelFilePath = "Models/hcmlp_weights.json";
+    modelFilePath = "C:/Users/miale.a/Documents/GitHub/GreyBoxDRC_JUCE/Code/Source/Models/hcmlp_weights.json";
 
     std::cout << "Loading model from path: " << modelFilePath << std::endl;
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
@@ -108,6 +108,7 @@ void GreyBoxDRCAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     }
 
     // pass weights to CompModel
+    jsonStream.seekg(0); // rewind the stream
     compressor.loadModel(jsonStream);
     
     compressor.prepare(sampleRate);
