@@ -56,6 +56,12 @@ public:
 
     void sliderValueChanged(juce::Slider* slider) override;
 
+    // Atomic so editor can safely read from the GUI thread
+    // Also need to be made public
+    std::atomic<float> currentT{ 0.0f };
+    std::atomic<float> currentR{ 1.0f };
+    std::atomic<float> currentW{ 0.0f };
+
 private:
     //==============================================================================
     CompModel compressor;

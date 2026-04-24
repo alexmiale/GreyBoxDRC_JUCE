@@ -25,7 +25,7 @@ void GainSmooth::reset()
 
 float GainSmooth::processSample(float gcNorm)
 {
-    // One-pole filter: y[n] = ?·y[n-1] + (1-?)·x[n]
+    // One-pole filter: y[n] = a·y[n-1] + (1-a)·x[n]
     float y = alpha * yPrev + (1.0f - alpha) * gcNorm;
     yPrev = y;
     return y;
@@ -33,6 +33,6 @@ float GainSmooth::processSample(float gcNorm)
 
 void GainSmooth::updateCoefficient()
 {
-    // ? = exp(-1 / (? · fs))  — guarantees |?| < 1 (stable)
+    // a = exp(-1 / (tau · fs))  — guarantees |a| < 1 (stable)
     alpha = std::exp(-1.0f / (tau * static_cast<float> (fs)));
 }

@@ -107,6 +107,7 @@ void GreyBoxDRCAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
         return;
     }
 
+    // pass weights to CompModel
     compressor.loadModel(jsonStream);
     
     compressor.prepare(sampleRate);
@@ -157,10 +158,18 @@ bool GreyBoxDRCAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 
 /** update the compressor when the slider has changed **/
 void GreyBoxDRCAudioProcessor::sliderValueChanged(juce::Slider* slider) {
-    param = slider->getValue();
-    const float* outputs = compressor.forward(param);
+    param = slider->getValue(); // get slider value
+    float normalized = (param / 50.0f) - 1.0f; // change from 0-100 to -1-1
+    const float* outputs = compressor.forward(normalized); // pass to model
 
+    // update params
     compressor.setAllCompFromModel(outputs);
+    
+    // update text boxes
+    auto staticComp = compressor.getStaticComp();
+    currentT.store(staticComp.getThreshold());
+    currentR.store(staticComp.getRatio());
+    currentW.store(staticComp.getWidth());
 }
 
 void GreyBoxDRCAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)

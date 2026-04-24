@@ -26,7 +26,7 @@ void CompModel::loadModel(std::ifstream& jsonStream) {
     RTNeural::torch_helpers::loadDense<float>(fullJson, "model.HCNet.4.", output);
 }
 
-// ?? Parameter setters ????????????????????????????????????????
+// Parameter setters 
 
 void CompModel::setThreshold(float thresholdDB)
 {
@@ -43,7 +43,7 @@ void CompModel::setWidth(float width)
     staticComp.setParams(staticComp.getThreshold(), staticComp.getRatio(), width);
 }
 
-
+// update params all at once with normalization after passed through model
 void CompModel::setAllCompFromModel(const float* inputs) {
     float thresholdDB = inputs[0] * -80.0f;         // [-80, 0] dB
     float ratio = inputs[1] * 29.0f + 1.0f;       //  [1, 30]
@@ -62,7 +62,7 @@ void CompModel::setMakeUpGainDB(float dB)
     makeUp.setGainDB(dB);
 }
 
-// ?? Processing ???????????????????????????????????????????????
+// Processing
 
 float CompModel::processSample(float x)
 {
