@@ -1,2 +1,6 @@
 # GreyBoxDRC_JUCE
-Implementing GreyBoxDRC in JUCE 
+GreyBoxDRC was initially created by Alec Wright and Vesa Välimäki as an emulation of analog compressors, with this one trained on the LA-2A levelling compressor. I downloaded the original dataset from this link: https://zenodo.org/records/3824876#.YyMaiOxBzUI and used the preprocessing in the GreyBoxDRC repo to separate the data into train, test, and validation folders. All of these folders are found in this repository. 
+
+We also used the train functions in the GreyBoxDRC repository to create our own trained model. We used Google Colab to utilize their GPUs and speed up training. The specific model trained was the first configuration set in the repository, which used a soft-knee compression curve, a one-pole gain smoothing function, and a static make-up gain.
+
+This repository utilizes CMake, RTNeural (https://github.com/jatinchowdhury18/RTNeural), and JUCE to load the model and run the DSP in C++. The model functions in the GreyBoxDRC repository were written in Python, and this repository rewrites this code in C++ specifically for the configuration trained. JUCE was used to create the audio plugin and process the input/output audio samples. The CMakeLists file is included, with changes needed to your RTNeural and JUCE paths to build the audio plugin. The build files are not included due to their size. 
